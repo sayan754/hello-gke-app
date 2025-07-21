@@ -1,14 +1,21 @@
 steps:
-# This single step builds the image, tags it twice (with commit SHA and 'latest'),
-# and pushes it to the specified Artifact Registry repository.
+# Step 1: Build the container image and tag it.
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
     '--tag=us-central1-docker.pkg.dev/$PROJECT_ID/hello-gke-app/hello-image:$COMMIT_SHA',
     '--tag=us-central1-docker.pkg.dev/$PROJECT_ID/hello-gke-app/hello-image:latest',
-    '--push=us-central1-docker.pkg.dev/$PROJECT_ID/hello-gke-app/',
     '.'
   ]
 
+# Step 2: Push BOTH tags to Artifact Registry. We push the specific commit tag first.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/hello-gke-app/hello-image:$COMMIT_SHA']
+
+# Step 3: And we also push the 'latest' tag.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/hello-gke-app/hello-image:latest']
+
+# Our logging option
 options:
   logging: CLOUD_LOGGING_ONLY
